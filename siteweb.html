@@ -2,22 +2,193 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Fast Food</title>
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0f2027;
-      font-family: Georgia, serif;
-      color: white;
-    }
-    h1 { font-size: 6rem; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; }
+    .screen { display: none !important; }
+    .screen.active { display: block !important; }
+    #landing.active { display: flex !important; }
+    #confirm-screen.active { display: flex !important; }
+    #landing { min-height:100vh; background:#1a0a00; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; }
+    .grill-lines { position:absolute; inset:0; background-image:repeating-linear-gradient(0deg,transparent,transparent 38px,rgba(255,120,0,0.08) 38px,rgba(255,120,0,0.08) 40px); }
+    .flames { position:absolute; bottom:0; left:0; right:0; height:140px; background:linear-gradient(to top,#e25c00,#ff9900,transparent); opacity:0.4; }
+    .badge-open { background:#e25c00; color:#fff7f0; font-family:sans-serif; font-size:12px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; padding:7px 20px; border-radius:20px; margin-bottom:1.6rem; position:relative; }
+    #landing h1 { font-size:clamp(4rem,15vw,8rem); font-weight:700; color:#fff8f0; line-height:1; letter-spacing:-0.02em; }
+    #landing h1 span { color:#ff7a00; }
+    .tap-hint { margin-top:1.8rem; font-family:sans-serif; font-size:14px; color:rgba(255,240,220,0.55); letter-spacing:0.12em; text-transform:uppercase; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+    .site-header { background:#1a0a00; padding:1.2rem 2rem; display:flex; align-items:center; justify-content:space-between; }
+    .site-logo { font-size:1.5rem; color:#fff8f0; }
+    .site-logo span { color:#ff7a00; }
+    .back-btn { font-family:sans-serif; font-size:13px; color:rgba(255,240,220,0.6); cursor:pointer; border:none; background:none; padding:0; }
+    .back-btn:hover { color:#ff7a00; }
+    #menu-screen { background:#faf7f2; min-height:100vh; }
+    .section-label { font-family:sans-serif; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#a07050; padding:2rem 2rem 0.8rem; }
+    .menu-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; padding:0 2rem 1.5rem; max-width:960px; margin:0 auto; }
+    .menu-card { background:#fff; border-radius:16px; border:1px solid #e8ddd0; overflow:hidden; cursor:pointer; transition:transform 0.18s,box-shadow 0.18s; }
+    .menu-card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(200,100,0,0.12); }
+    .menu-card img { width:100%; height:210px; object-fit:cover; display:block; }
+    .card-body { padding:16px 18px 18px; }
+    .card-name { font-size:17px; font-weight:700; color:#1a0a00; margin-bottom:5px; }
+    .card-desc { font-family:sans-serif; font-size:13px; color:#8a6a50; line-height:1.6; margin-bottom:14px; }
+    .card-footer { display:flex; align-items:center; justify-content:space-between; }
+    .card-price { font-size:20px; font-weight:700; color:#e25c00; }
+    .order-btn { background:#e25c00; color:#fff; border:none; border-radius:10px; padding:9px 20px; font-size:14px; font-family:sans-serif; cursor:pointer; }
+    .order-btn:hover { background:#c44e00; }
+    .extras-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; padding:0 2rem 2.5rem; max-width:960px; margin:0 auto; }
+    .extra-card { background:#fff; border:1px solid #e8ddd0; border-radius:14px; padding:18px; text-align:center; }
+    .extra-emoji { font-size:28px; margin-bottom:8px; }
+    .extra-name { font-family:sans-serif; font-size:14px; font-weight:600; color:#1a0a00; }
+    .extra-price { font-family:sans-serif; font-size:13px; color:#a07050; margin-top:3px; }
+    .site-footer { background:#1a0a00; text-align:center; padding:1.4rem; font-family:sans-serif; font-size:12px; color:rgba(255,240,220,0.35); letter-spacing:0.1em; }
+    #delivery-screen { background:#faf7f2; min-height:100vh; }
+    .delivery-body { padding:2rem; max-width:520px; margin:0 auto; }
+    .selected-item { background:#fff; border:1px solid #e8ddd0; border-radius:14px; display:flex; align-items:center; gap:16px; padding:14px 16px; margin-bottom:2rem; }
+    .selected-item img { width:70px; height:70px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+    .sel-name { font-size:16px; font-weight:700; color:#1a0a00; }
+    .sel-price { font-family:sans-serif; font-size:14px; color:#e25c00; margin-top:4px; }
+    .form-label { display:block; font-family:sans-serif; font-size:11px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:#a07050; margin-bottom:8px; }
+    .form-input { width:100%; background:#fff; border:1px solid #d8cdc0; border-radius:12px; padding:13px 16px; font-size:15px; font-family:sans-serif; color:#1a0a00; margin-bottom:1.4rem; outline:none; }
+    .form-input:focus { border-color:#e25c00; }
+    .error-msg { font-family:sans-serif; font-size:13px; color:#c0392b; margin-top:-1rem; margin-bottom:1.2rem; display:none; }
+    .verify-btn { width:100%; background:#e25c00; color:#fff; border:none; border-radius:12px; padding:15px; font-size:16px; font-weight:700; font-family:sans-serif; cursor:pointer; margin-top:0.4rem; }
+    .verify-btn:hover { background:#c44e00; }
+    #confirm-screen { background:#1a0a00; min-height:100vh; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; }
+    .confirm-icon { font-size:72px; margin-bottom:1.2rem; }
+    .confirm-title { font-size:clamp(2rem,6vw,3rem); color:#fff8f0; margin-bottom:0.8rem; }
+    .confirm-title span { color:#ff7a00; }
+    .confirm-sub { font-family:sans-serif; font-size:15px; color:rgba(255,240,220,0.55); line-height:1.7; max-width:320px; margin-bottom:2rem; }
+    .confirm-detail { background:rgba(255,255,255,0.07); border-radius:14px; padding:16px 24px; font-family:sans-serif; font-size:14px; color:rgba(255,240,220,0.65); margin-bottom:2.2rem; width:100%; max-width:360px; text-align:left; line-height:2.1; }
+    .confirm-detail strong { color:#fff8f0; }
+    .new-order-btn { background:#e25c00; color:#fff; border:none; border-radius:12px; padding:13px 32px; font-size:15px; font-weight:700; font-family:sans-serif; cursor:pointer; }
+    .new-order-btn:hover { background:#c44e00; }
   </style>
 </head>
 <body>
-  <h1>Hello</h1>
+
+  <!-- LANDING -->
+  <div id="landing" class="screen active" onclick="openMenu()">
+    <div class="grill-lines"></div>
+    <div class="flames"></div>
+    <div class="badge-open">🔥 Now Open</div>
+    <h1>Hell<span>o</span></h1>
+    <p class="tap-hint">→ Click to see our menu</p>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu-screen" class="screen">
+    <div class="site-header">
+      <div class="site-logo">Hell<span>o</span> Fast Food</div>
+      <button class="back-btn" onclick="show('landing')">← Back to site</button>
+    </div>
+    <div class="section-label">Pasta Specialties</div>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="selectItem('Shrimp Alfredo','$14.99',0)">
+        <img src="shrimp-alfredo.jpg" alt="Shrimp Alfredo">
+        <div class="card-body">
+          <div class="card-name">Shrimp Alfredo</div>
+          <div class="card-desc">Creamy fettuccine with juicy tiger shrimp, parsley & cracked black pepper</div>
+          <div class="card-footer">
+            <div class="card-price">$14.99</div>
+            <button class="order-btn">Order now</button>
+          </div>
+        </div>
+      </div>
+      <div class="menu-card" onclick="selectItem('Spaghetti Carbonara','900Da',1)">
+        <img src="carbonara.jpg" alt="Spaghetti Carbonara">
+        <div class="card-body">
+          <div class="card-name">Spaghetti Carbonara</div>
+          <div class="card-desc">Roman-style spaghetti with crispy guanciale, Pecorino Romano & cracked pepper</div>
+          <div class="card-footer">
+            <div class="card-price">$900Da</div>
+            <button class="order-btn">Order now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">Sides & Drinks</div>
+    <div class="extras-grid">
+      <div class="extra-card"><div class="extra-emoji">🥖</div><div class="extra-name">Garlic Bread</div><div class="extra-price">$3.50</div></div>
+      <div class="extra-card"><div class="extra-emoji">🥗</div><div class="extra-name">Side Salad</div><div class="extra-price">$4.99</div></div>
+      <div class="extra-card"><div class="extra-emoji">🥤</div><div class="extra-name">Soft Drink</div><div class="extra-price">$700Da</div></div>
+      <div class="extra-card"><div class="extra-emoji">☕</div><div class="extra-name">Espresso</div><div class="extra-price">400Da</div></div>
+    </div>
+    <div class="site-footer">Hello Fast Food · Fresh pasta, fast service</div>
+  </div>
+
+  <!-- DELIVERY -->
+  <div id="delivery-screen" class="screen">
+    <div class="site-header">
+      <div class="site-logo">Hell<span>o</span> Fast Food</div>
+      <button class="back-btn" onclick="show('menu-screen')">← Back to menu</button>
+    </div>
+    <div class="delivery-body">
+      <div class="selected-item">
+        <img id="del-img" src="" alt="">
+        <div>
+          <div class="sel-name" id="del-name"></div>
+          <div class="sel-price" id="del-price"></div>
+        </div>
+      </div>
+      <label class="form-label">Delivery Address</label>
+      <input class="form-input" id="address-input" type="text" placeholder="e.g. 12 Rue des Oliviers, Algiers">
+      <div class="error-msg" id="addr-err">Please enter your delivery address.</div>
+      <label class="form-label">Phone Number</label>
+      <input class="form-input" id="phone-input" type="tel" placeholder="e.g. +213 555 123 456">
+      <div class="error-msg" id="phone-err">Please enter your phone number.</div>
+      <button class="verify-btn" onclick="verify()">✓ Verify & Order</button>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div id="confirm-screen" class="screen">
+    <div class="confirm-icon">🛵</div>
+    <div class="confirm-title">Delivery <span>coming soon!</span></div>
+    <p class="confirm-sub">Your order is confirmed. Our rider is heading your way — sit tight!</p>
+    <div class="confirm-detail">
+      <div><strong>Order:</strong> <span id="conf-name"></span></div>
+      <div><strong>Address:</strong> <span id="conf-addr"></span></div>
+      <div><strong>Phone:</strong> <span id="conf-phone"></span></div>
+      <div><strong>Estimated time:</strong> 25 – 35 min</div>
+    </div>
+    <button class="new-order-btn" onclick="show('landing')">← Back to site</button>
+  </div>
+
+  <script>
+    var imgs = ['shrimp-alfredo.jpg', 'carbonara.jpg'];
+
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+      document.getElementById(id).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function openMenu() { show('menu-screen'); }
+
+    function selectItem(name, price, idx) {
+      document.getElementById('del-img').src = imgs[idx];
+      document.getElementById('del-name').textContent = name;
+      document.getElementById('del-price').textContent = price;
+      document.getElementById('address-input').value = '';
+      document.getElementById('phone-input').value = '';
+      document.getElementById('addr-err').style.display = 'none';
+      document.getElementById('phone-err').style.display = 'none';
+      show('delivery-screen');
+    }
+
+    function verify() {
+      var addr = document.getElementById('address-input').value.trim();
+      var phone = document.getElementById('phone-input').value.trim();
+      document.getElementById('addr-err').style.display = addr ? 'none' : 'block';
+      document.getElementById('phone-err').style.display = phone ? 'none' : 'block';
+      if (!addr || !phone) return;
+      document.getElementById('conf-name').textContent = document.getElementById('del-name').textContent;
+      document.getElementById('conf-addr').textContent = addr;
+      document.getElementById('conf-phone').textContent = phone;
+      show('confirm-screen');
+    }
+  </script>
 </body>
 </html>
